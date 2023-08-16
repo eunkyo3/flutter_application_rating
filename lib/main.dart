@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_rating/meal_api.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 void main() {
@@ -22,8 +23,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    score.add(Score(rate: 5, comment: '맛돌이'));
-    score.add(Score(rate: 1, comment: '노맛돌이'));
+    score.add(Score(rate: 5, comment: '맛있어요'));
+    score.add(Score(rate: 1, comment: '맛없어요'));
   }
 
   @override
@@ -64,14 +65,20 @@ class _MyAppState extends State<MyApp> {
               controller: _textEditingController,
               enabled: enabled,
               decoration: const InputDecoration(
-                  hintText: '맛이 어떻냐고',
-                  label: Text('급식 맛돌이?'),
+                  hintText: '맛을 평가해주세요.',
+                  label: Text('오늘의 급식 평가'),
                   border: OutlineInputBorder()),
               maxLength: 20,
             ),
             ElevatedButton(
                 onPressed: enabled
-                    ? () {
+                    ? () async {
+                        var api = MealApi();
+                        var evalDate = DateTime.now().toString().split(' ')[0];
+                        var res = await api.insert(
+                            evalDate, rate, _textEditingController.text);
+                        print(res);
+
                         score.add(
                           Score(
                               rate: rate, comment: _textEditingController.text),
