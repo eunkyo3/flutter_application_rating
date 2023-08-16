@@ -28,7 +28,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    var listView = ListView.builder(
+    var listView = ListView.separated(
+      itemCount: score.length,
+      separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) => ListTile(
         leading: Text('${score[index].rate}'),
         title: Text(score[index].comment),
@@ -40,7 +42,7 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             RatingBar.builder(
-              initialRating: 3,
+              initialRating: 0,
               minRating: 1,
               direction: Axis.horizontal,
               allowHalfRating: true,
