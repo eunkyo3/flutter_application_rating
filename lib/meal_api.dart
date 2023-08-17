@@ -27,4 +27,19 @@ class MealApi {
       return 'false';
     }
   }
+
+  // 결과 보기
+  Future<dynamic> getList({required eval_date}) async {
+    var site = '$url?mode=list&eval_date=$eval_date';
+    var response = await http.get(Uri.parse(site));
+
+    if (response.statusCode == 200) {
+      print('결과');
+      var data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      return data['data']['list'];
+    } else {
+      return [];
+    }
+  }
 }
