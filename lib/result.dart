@@ -2,6 +2,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_rating/meal_api.dart';
+import 'package:flutter_application_rating/my_chart.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -11,21 +12,36 @@ class Result extends StatefulWidget {
 }
 
 class _ResultState extends State<Result> {
+  dynamic chartPage = const Text('차트영역');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // chart
-          ElevatedButton(
-            onPressed: () async {
-              var mealApi = MealApi();
-              var evalDate = DateTime.now().toString().split(' ')[0];
-              var result = await mealApi.getList(eval_date: evalDate);
-              print(result);
-            },
-            child: const Text('확인'),
-          ),
+          IconButton(
+              onPressed: () async {
+                var dt = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2023),
+                    lastDate: DateTime.now());
+                if (dt != null) {
+                  var api = MealApi();
+                  var result = await api.getList(eval_date: dt);
+                  //print(result);
+                  List<String> days = [];
+                  List<double> ratings = [];
+                  for (var k in result) {
+                    days.add(k['eval_date']);
+                    ratings.add(double.parse(k['rating']));
+                  }
+                  setState(() {
+                    chartPage = MyChart(days: days, ratings: ratings);
+                  });
+                }
+              },
+              icon: const Icon(Icons.calendar_month)),
+          Expanded(child: chartPage),
         ],
       ),
     );
