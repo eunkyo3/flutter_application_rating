@@ -1,5 +1,4 @@
 //result.dart
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_rating/meal_api.dart';
 import 'package:flutter_application_rating/my_chart.dart';

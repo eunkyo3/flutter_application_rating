@@ -1,5 +1,6 @@
 // api test tool link
 // https://reqbin.com
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_rating/meal_api.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -14,32 +15,62 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final TextEditingController _textEditingController = TextEditingController();
   var enabled = false;
-  List<Score> score = [];
   double rate = 0;
+  String now = '날짜를 선택하세요';
+  dynamic listView = const Text('결과출력화면');
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    score.add(Score(rate: 5, comment: '맛있어요'));
-    score.add(Score(rate: 1, comment: '맛없어요'));
+  void showReview({required String evalDate}) async {
+    var api = MealApi();
+    var result = api.getReview(evalDate: evalDate);
+    setState(() {
+      listView = FutureBuilder(
+        future: result,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // 데이터 있음
+            var data = snapshot.data;
+            return ListView.separated(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: Text(data[index]['rating']),
+                    title: Text(data[index]["comment"]),
+                  );
+                },
+                separatorBuilder: (context, index) => const Divider(),
+                itemCount: data.length);
+          } else {
+            // 데이터 없음
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var listView = ListView.separated(
-      itemCount: score.length,
-      separatorBuilder: (context, index) => const Divider(),
-      itemBuilder: (context, index) => ListTile(
-        leading: Text('${score[index].rate}'),
-        title: Text(score[index].comment),
-      ),
-    );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
           children: [
+            ElevatedButton(
+                onPressed: () async {
+                  var dt = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2023),
+                    lastDate: DateTime.now(),
+                  );
+                  if (dt != null) {
+                    var date = dt.toString().split(' ')[0];
+                    setState(() {
+                      now = date;
+                    });
+                    showReview(evalDate: date);
+                  }
+                },
+                child: Text(now)),
             RatingBar.builder(
               initialRating: 0,
               minRating: 1,
@@ -75,12 +106,9 @@ class _MyAppState extends State<MyApp> {
                         var evalDate = DateTime.now().toString().split(' ')[0];
                         var res = await api.insert(
                             evalDate, rate, _textEditingController.text);
+                        showReview(evalDate: now);
                         print(res);
 
-                        score.add(
-                          Score(
-                              rate: rate, comment: _textEditingController.text),
-                        );
                         setState(() {
                           ListView;
                         });
@@ -93,11 +121,4 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-}
-
-class Score {
-  double rate;
-  String comment;
-
-  Score({required this.rate, required this.comment});
 }
